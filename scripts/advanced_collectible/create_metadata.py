@@ -10,16 +10,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-breed_to_image_uri = {
-    "PUG": "https://ipfs.io/ipfs/QmSsYRx3LpDAb1GZQm7zZ1AuHZjfbPkD6J7s9r41xu1mf8?filename=pug.png",
-    "SHIBA_INU": "https://ipfs.io/ipfs/QmYx6GsYAKnNzZ9A6NvEKV9nf1VaDzJrqDR23Y8YSkebLU?filename=shiba-inu.png",
-    "ST_BERNARD": "https://ipfs.io/ipfs/QmUPjADFGEKmfohdTaNcWhp7VGk26h5jXDA7v3VtTnTLcW?filename=st-bernard.png",
-}
+# breed_to_image_uri = {
+#     "PUG": "https://ipfs.io/ipfs/QmSsYRx3LpDAb1GZQm7zZ1AuHZjfbPkD6J7s9r41xu1mf8?filename=pug.png",
+#     "SHIBA_INU": "https://ipfs.io/ipfs/QmYx6GsYAKnNzZ9A6NvEKV9nf1VaDzJrqDR23Y8YSkebLU?filename=shiba-inu.png",
+#     "ST_BERNARD": "https://ipfs.io/ipfs/QmUPjADFGEKmfohdTaNcWhp7VGk26h5jXDA7v3VtTnTLcW?filename=st-bernard.png",
+# }
 
 
 def main():
     print("Working on " + network.show_active())
     advanced_collectible = AdvancedCollectible[-1]
+    # advanced_collectible = AdvancedCollectible[-4]
+    # advanced_collectible = AdvancedCollectible
     number_of_advanced_collectibles = advanced_collectible.tokenCounter()
     print(
         "The number of tokens you've deployed is: "
@@ -29,14 +31,16 @@ def main():
 
 
 def write_metadata(token_ids, nft_contract):
-    for token_id in range(token_ids):
+    for token_id in range(token_ids-1,token_ids):
+    # for token_id in range(token_ids):
         collectible_metadata = sample_metadata.metadata_template
-        breed = get_breed(nft_contract.tokenIdToBreed(token_id))
+        # breed = get_breed(nft_contract.tokenIdToBreed(token_id))
+        image_name = input("\n\nEnter Image Name:")
         metadata_file_name = (
             "./metadata/{}/".format(network.show_active())
             + str(token_id)
             + "-"
-            + breed
+            + image_name
             + ".json"
         )
         if Path(metadata_file_name).exists():
@@ -46,25 +50,25 @@ def write_metadata(token_ids, nft_contract):
             )
         else:
             print("Creating Metadata file: " + metadata_file_name)
-            collectible_metadata["name"] = get_breed(
-                nft_contract.tokenIdToBreed(token_id)
-            )
-            collectible_metadata["description"] = "An adorable {} pup!".format(
-                collectible_metadata["name"]
-            )
+            collectible_metadata["name"] = input("\n\nEnter Name of Object: ")
+            collectible_metadata["description"] = input("\n\nEnter Description of Object: ")
+            collectible_metadata["attributes"][0]["value"] = int(input("\n\nEnter Purity of gold: "))
+            collectible_metadata["attributes"][1]["value"] = int(input("\n\nEnter Weight of Biscuit: "))
+            collectible_metadata["attributes"][2]["value"] = int(input("\n\nEnter Worth of Biscuit: "))
+            collectible_metadata["attributes"][3]["value"] = input("\n\nEnter Predecessor Address: ")
             image_to_upload = None
             if os.getenv("UPLOAD_IPFS") == "true":
-                image_path = "./img/{}.png".format(
-                    breed.lower().replace('_', '-'))
+                image_path = "./img/{}".format(image_name)
                 image_to_upload = upload_to_ipfs(image_path)
             image_to_upload = (
-                breed_to_image_uri[breed] if not image_to_upload else image_to_upload
+                breed_to_image_uri[image_name] if not image_to_upload else image_to_upload
             )
             collectible_metadata["image"] = image_to_upload
             with open(metadata_file_name, "w") as file:
                 json.dump(collectible_metadata, file)
             if os.getenv("UPLOAD_IPFS") == "true":
                 upload_to_ipfs(metadata_file_name)
+        
 
 # curl -X POST -F file=@metadata/rinkeby/0-SHIBA_INU.json http://localhost:5001/api/v0/add
 
@@ -77,8 +81,7 @@ def upload_to_ipfs(filepath):
             if os.getenv("IPFS_URL")
             else "http://localhost:5001"
         )
-        response = requests.post(ipfs_url + "/api/v0/add",
-                                 files={"file": image_binary})
+        response = requests.post(ipfs_url + "/api/v0/add",files={"file": image_binary})
         ipfs_hash = response.json()["Hash"]
         filename = filepath.split("/")[-1:][0]
         image_uri = "ipfs://{}?filename={}".format(

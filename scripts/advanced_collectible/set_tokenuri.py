@@ -4,26 +4,28 @@ from metadata import sample_metadata
 from scripts.helpful_scripts import get_breed, OPENSEA_FORMAT
 
 
-dog_metadata_dic = {
-    "PUG": "ipfs://Qmd9MCGtdVz2miNumBHDbvj8bigSgTwnr4SbyH6DNnpWdt?filename=0-PUG.json",
-    "SHIBA_INU": "ipfs://QmdryoExpgEQQQgJPoruwGJyZmz6SqV4FRTX1i73CT3iXn?filename=1-SHIBA_INU.json",
-    "ST_BERNARD": "ipfs://QmbBnUjyHHN7Ytq9xDsYF9sucZdDJLRkWz7vnZfrjMXMxs?filename=2-ST_BERNARD.json",
-}
+# dog_metadata_dic = {
+#     "PUG": "ipfs://Qmd9MCGtdVz2miNumBHDbvj8bigSgTwnr4SbyH6DNnpWdt?filename=0-PUG.json",
+#     "SHIBA_INU": "ipfs://QmdryoExpgEQQQgJPoruwGJyZmz6SqV4FRTX1i73CT3iXn?filename=1-SHIBA_INU.json",
+#     "ST_BERNARD": "ipfs://QmbBnUjyHHN7Ytq9xDsYF9sucZdDJLRkWz7vnZfrjMXMxs?filename=2-ST_BERNARD.json",
+# }
 
 def main():
     print("Working on " + network.show_active())
     advanced_collectible = AdvancedCollectible[len(AdvancedCollectible) - 1]
+    # advanced_collectible = AdvancedCollectible[len(AdvancedCollectible) - 4]
     number_of_advanced_collectibles = advanced_collectible.tokenCounter()
     print(
         "The number of tokens you've deployed is: "
         + str(number_of_advanced_collectibles)
     )
-    for token_id in range(number_of_advanced_collectibles):
-        breed = get_breed(advanced_collectible.tokenIdToBreed(token_id))
+    for token_id in range(number_of_advanced_collectibles-1,number_of_advanced_collectibles):
+    # for token_id in range(number_of_advanced_collectibles):
+        # breed = get_breed(advanced_collectible.tokenIdToBreed(token_id))
+        URI  = input("\n\nURL of JSON file on IPFS: ")
         if not advanced_collectible.tokenURI(token_id).startswith("https://"):
             print("Setting tokenURI of {}".format(token_id))
-            set_tokenURI(token_id, advanced_collectible,
-                         dog_metadata_dic[breed])
+            set_tokenURI(token_id, advanced_collectible,URI)
         else:
             print("Skipping {}, we already set that tokenURI!".format(token_id))
 

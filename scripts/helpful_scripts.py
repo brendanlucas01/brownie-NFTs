@@ -102,6 +102,7 @@ def fund_with_link(
 ):
     account = account if account else get_account()
     link_token = link_token if link_token else get_contract("link_token")
+    print(link_token,amount,contract_address)
     tx = interface.LinkTokenInterface(link_token).transfer(
         contract_address, amount, {"from": account}
     )
@@ -168,8 +169,12 @@ def listen_for_event(brownie_contract, event, timeout=200, poll_interval=2):
     start_time = time.time()
     current_time = time.time()
     event_filter = web3_contract.events[event].createFilter(fromBlock="latest")
+    print(event_filter,event)
+    # print(brownie_contract.address,brownie_contract.abi)
     while current_time - start_time < timeout:
+        # print(current_time)
         for event_response in event_filter.get_new_entries():
+            print(event,event_response)
             if event in event_response.event:
                 print("Found event!")
                 return event_response
